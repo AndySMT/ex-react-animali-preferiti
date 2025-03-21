@@ -17,16 +17,19 @@
     <div id="root"></div>
     <script type='text/babel'>
         const root = ReactDOM.createRoot(document.getElementById("root"));
-        root.render(
-            <App />);
+        root.render(<App />);
         function App() {
             const { useState } = React
             const [animals, setAnimals] = useState([])
-            const animalsChoices = ["Cane", "Gatto", "Pappagallo", "Cavallo", "Panda"];
-            const addAnimal = () => {
-                const random = Math.floor(Math.random() * animalsChoices.length);
-                const randomAnimal = animalsChoices[random];
-                setAnimals([...animals, randomAnimal]);
+
+            const [isVisible, setIsVisible] = useState(false)
+
+            const apriModale = (() => setIsVisible(true));
+            const chiudiModale = (() => setIsVisible(false));
+
+            const addAnimal = (animal) => {
+                setAnimals([...animals, animal]);
+                chiudiModale();
             };
             return (
                 <>
@@ -38,13 +41,13 @@
                             <img src="https://picsum.photos/400/300" alt="Immagine Casuale" />
                         </figure>
                         <div className="lista-animali">
-                            <button className="bg-blue-500 text-white text-sm px-1 mt-2 rounded" onClick={addAnimal}>Aggiungi Animale</button>
+                            <button className="bg-blue-500 text-white text-sm px-1 mt-2 rounded ml-1" onClick={apriModale}>Aggiungi Animale</button>
                             <details>
                                 <summary>
                                     Animali
                                 </summary>
                                 <ul>
-                                    {animals.map((animal, index) => <li key={index}>{animal}</li>)}
+                                    {animals.map((animal, index) => (<li key={index}>{animal}</li>))}
                                 </ul>
                             </details>
                         </div>
@@ -52,10 +55,43 @@
                     <footer>
                         <p>Creato con amore da... un collega sbadato! 🐾</p>
                     </footer>
+                    <Modal
+                        title="Nuovo Animale"
+                        show={isVisible}
+                        onClose={chiudiModale}
+                        onAdd={addAnimal}
+                    />
                 </>
             )
         }
 
+        function Modal({ title, content, show, onClose, onAdd }) {
+
+            const { useState } = React
+            const [inputValue, setInputValue] = useState("")
+            return show && ReactDOM.createPortal(
+                <div className="modal-container ">
+                    <div className="modal bg-gray-300">
+                        <h2>{title}</h2>
+                        <input className="border rounded"
+                            type="text"
+                            placeholder="Inserisci nome Animale"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
+                        />
+                        <div>
+                            <button className="bg-blue-500 text-white text-sm px-1 mt-2 rounded ml-1" onClick={() => {
+                                onAdd(inputValue); setInputValue("");
+                            }}>Aggiungi
+                            </button>
+                            <button className="bg-red-700 text-white text-sm px-1 mt-2 rounded ml-1" onClick={onClose}>Annulla</button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )
+        }
     </script>
 </body>
 
